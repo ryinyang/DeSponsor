@@ -1,16 +1,13 @@
 <!--
 Sync Impact Report
-Version change: (none) → 1.0.0 (initial ratification)
-Modified principles: N/A (initial creation)
+Version change: 1.0.0 → 1.1.0 (MINOR: new principle added)
+Modified principles: N/A (no existing principle redefined or removed)
 Added principles:
-  - I. Test-First (NON-NEGOTIABLE)
-  - II. Simplicity (YAGNI)
-  - III. Library-First, Modular Design
-  - IV. Observability & Structured Logging
-Added sections:
-  - Quality & Accuracy Gates
-  - Development Workflow
-  - Governance
+  - V. Simplified Technical English (ASD-STE100)
+Modified sections:
+  - Development Workflow — added a PR compliance check for Principle V
+Added sections: none (this amendment only adds a principle and extends an
+  existing section)
 Removed sections: none
 Deferred placeholders: none
 Templates requiring follow-up review (not modified by this command; out of scope
@@ -18,7 +15,13 @@ per constitution-command scope guard):
   - .specify/templates/plan-template.md — ⚠ verify Constitution Check gates reference these principles
   - .specify/templates/spec-template.md — ⚠ verify no conflicting assumptions
   - .specify/templates/tasks-template.md — ⚠ verify task categorization supports test-first ordering
-  - .specify/templates/checklist-template.md — ⚠ verify alignment with Quality & Accuracy Gates
+  - .specify/templates/checklist-template.md — ⚠ verify alignment with Quality & Accuracy Gates and, now, Principle V (ASD-STE100 wording)
+
+---
+Prior report (v(none) → 1.0.0, 2026-08-20):
+Added principles: I. Test-First (NON-NEGOTIABLE); II. Simplicity (YAGNI);
+  III. Library-First, Modular Design; IV. Observability & Structured Logging
+Added sections: Quality & Accuracy Gates; Development Workflow; Governance
 -->
 
 # DeSponsor Constitution
@@ -71,6 +74,26 @@ Rationale: Because ad detection is ML-based and probabilistic, the team needs
 a reliable feedback loop to catch model drift and user-impacting false
 positives without compromising listener privacy.
 
+### V. Simplified Technical English (ASD-STE100)
+All technical documentation for DeSponsor — specs, plans, READMEs, code
+comments, and PR descriptions — and all agent-to-operator communication —
+chat responses, status updates, and explanations — MUST conform to the
+ASD-STE100 (Simplified Technical English) writing rules. Writers MUST use
+approved words in their approved meaning wherever practical. Writers MUST
+keep sentences short: a target of 20 words or fewer, with a hard limit of
+about 25 words. Writers MUST write one instruction or one idea in each
+sentence. Writers MUST use the active voice and simple verb tenses.
+Writers MUST NOT use unexplained jargon, long strings of nouns, or more
+than one term for the same thing.
+
+Rationale: ASD-STE100 removes ambiguity from instructions and
+explanations. This matters for technical documentation that other
+contributors and future agents must follow exactly, and it matters for
+operator-facing communication about a product whose core feature (ML-based
+ad detection) already asks users to trust automated decisions that are
+sometimes wrong. Clear, simple language lowers the risk that an agent's
+explanation is misread.
+
 ## Quality & Accuracy Gates
 
 Any change to ML-based ad detection (model updates, heuristic or threshold
@@ -88,9 +111,11 @@ privacy impact before adoption.
 
 All changes MUST go through code review before merging to the main branch. A
 pull request MUST demonstrate: tests written before implementation (Principle
-I), no unjustified complexity (Principle II), and structured logging for any
-new or changed detection/decision path (Principle IV). Reviewers MUST verify
-constitution compliance as part of review, not only functional correctness.
+I), no unjustified complexity (Principle II), structured logging for any
+new or changed detection/decision path (Principle IV), and Simplified
+Technical English wording (Principle V) in any new or changed
+documentation. Reviewers MUST verify constitution compliance as part of
+review, not only functional correctness.
 
 ## Governance
 
@@ -105,4 +130,4 @@ approved directly by the project owner. All PRs and reviews MUST verify
 compliance with this constitution, and any complexity that appears to
 violate Principle II MUST be explicitly justified in the PR description.
 
-**Version**: 1.0.0 | **Ratified**: 2026-08-20 | **Last Amended**: 2026-08-20
+**Version**: 1.1.0 | **Ratified**: 2026-08-20 | **Last Amended**: 2026-08-20

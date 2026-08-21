@@ -10,6 +10,8 @@ data class PlaybackState(
     val podcastTitle: String? = null,
     val isPlaying: Boolean = false,
     val positionSeconds: Int = 0,
+    /** Sub-second position, used to render the timeline smoothly (FR-005 / SC-009). */
+    val positionMillis: Long = 0,
 ) {
     companion object {
         val Idle = PlaybackState()

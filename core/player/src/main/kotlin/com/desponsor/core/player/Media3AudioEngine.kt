@@ -32,6 +32,8 @@ class Media3AudioEngine(
 
     override fun currentPositionSeconds(): Int = (player.currentPosition / 1000L).toInt()
 
+    override fun currentPositionMillis(): Long = player.currentPosition
+
     fun release() {
         player.release()
     }

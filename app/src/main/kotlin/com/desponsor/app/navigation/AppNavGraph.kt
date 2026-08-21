@@ -77,13 +77,17 @@ fun AppNavGraph(container: AppContainer) {
                                 HomeScreen(uiState = uiState, onPodcastSelected = ::openPodcastsFirstEpisode)
                             }
                             entry<AppRoute.Player> {
+                                val scrubPositionSeconds by playerViewModel.scrubPositionSeconds.collectAsStateWithLifecycle()
                                 PlayerScreen(
                                     state = playbackState,
+                                    scrubPositionSeconds = scrubPositionSeconds,
                                     onPlayPause = { playerViewModel.onPlayPause(playbackState.isPlaying) },
                                     onSkipForward30 = playerViewModel::onSkipForward30,
                                     onSkipBackward30 = playerViewModel::onSkipBackward30,
                                     onNext = playerViewModel::onNext,
                                     onPrevious = playerViewModel::onPrevious,
+                                    onScrubDrag = playerViewModel::onScrubDrag,
+                                    onScrubEnd = playerViewModel::onScrubEnd,
                                 )
                             }
                             entry<AppRoute.Explore> {

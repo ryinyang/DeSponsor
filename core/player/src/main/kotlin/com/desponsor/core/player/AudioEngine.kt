@@ -11,4 +11,7 @@ interface AudioEngine {
     fun seekTo(positionSeconds: Int)
 
     fun currentPositionSeconds(): Int
+
+    /** Sub-second position, used to render the timeline smoothly (FR-005 / SC-009). */
+    fun currentPositionMillis(): Long
 }

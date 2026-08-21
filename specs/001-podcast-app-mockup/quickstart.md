@@ -53,6 +53,15 @@ Each scenario below maps to an acceptance scenario in spec.md.
    - Tap "skip backward 30s" → progress moves back by 30s.
    - Tap next/previous → adjacent episode loads; at the first/last episode,
      the control is a safe no-op.
+   - While playing, watch the timeline: it MUST visibly advance in small,
+     smooth steps (at least every 250ms) rather than jumping once per
+     second (SC-009).
+   - Press and drag the timeline to a new position: the displayed time
+     MUST follow your finger live while dragging; releasing MUST commit
+     playback to that position. Drag past either end — it MUST clamp at
+     0:00 or the episode's end rather than erroring or skipping to another
+     episode (FR-021). This is the full-screen Player only; the persistent
+     mini-player is not required to be draggable.
 
 2. **Explore → Search → Detail → Subscribe (User Story 2, P2)**
    - Open Explore. A mocked catalog of podcasts not yet subscribed is shown.
@@ -87,7 +96,7 @@ Each scenario below maps to an acceptance scenario in spec.md.
 
 All six primary screens (Home, Player, Explore, Search results, Podcast
 Detail, Settings) are reachable and fully interactive per spec.md's
-Success Criteria (SC-001–SC-008), with and without network connectivity.
+Success Criteria (SC-001–SC-009), with and without network connectivity.
 
 ## Validation run (2026-08-20)
 

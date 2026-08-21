@@ -4,27 +4,37 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.desponsor.core.designsystem.PodcastArtwork
 import com.desponsor.core.designsystem.TransportControls
 import com.desponsor.core.model.PlaybackState
+import kotlin.math.roundToInt
 
-/** The Player screen: artwork, title, progress, and full transport controls (FR-004–FR-006). */
+/**
+ * The Player screen: artwork, title, timeline, and full transport controls
+ * (FR-004–FR-006, FR-021). [scrubPositionSeconds] is non-null while the user
+ * is dragging the timeline; it overrides [PlaybackState.positionSeconds] for
+ * display until [onScrubEnd] commits the seek (FR-021).
+ */
 @Composable
 fun PlayerScreen(
     state: PlaybackState,
+    scrubPositionSeconds: Int?,
     onPlayPause: () -> Unit,
     onSkipForward30: () -> Unit,
     onSkipBackward30: () -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit,
+    onScrubDrag: (Int) -> Unit,
+    onScrubEnd: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val episode = state.currentEpisode
@@ -49,10 +59,17 @@ fun PlayerScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
-        val progress = episode?.let { state.positionSeconds.toFloat() / it.durationSeconds.coerceAtLeast(1) } ?: 0f
-        LinearProgressIndicator(
-            progress = { progress },
-            modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
+        val durationSeconds = episode?.durationSeconds?.coerceAtLeast(1) ?: 1
+        // While not scrubbing, use the sub-second positionMillis (not the
+        // whole-second positionSeconds) so the timeline visibly moves
+        // between second boundaries too (FR-005 / SC-009).
+        val sliderValue = scrubPositionSeconds?.toFloat() ?: (state.positionMillis / 1_000f)
+        Slider(
+            value = sliderValue,
+            valueRange = 0f..durationSeconds.toFloat(),
+            onValueChange = { newValue -> onScrubDrag(newValue.roundToInt().coerceIn(0, durationSeconds)) },
+            onValueChangeFinished = onScrubEnd,
+            modifier = Modifier.fillMaxWidth().padding(top = 24.dp).testTag("PlayerTimeline"),
         )
         TransportControls(
             isPlaying = state.isPlaying,

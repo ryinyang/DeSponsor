@@ -16,6 +16,13 @@
 
 - Q: Should the 30-second skip control move playback forward only, or both forward and backward? → A: Both. The user MUST be able to skip forward 30 seconds and skip backward 30 seconds.
 
+### Session 2026-08-21
+
+- Q: How smooth should the timeline's progress update be while playing? → A: Fixed sub-second interval (100-250ms) — visibly smooth without per-frame overhead.
+- Q: When the user drags on the timeline to scrub, should audio move live as they drag, or only jump once they release? → A: Displayed time updates live during drag; the actual playback seek commits only on release.
+- Q: Should tap-and-drag scrubbing be available on the mini-player as well as the full-screen player, or only the full-screen player? → A: Full-screen player only; the mini-player shows progress but is not draggable.
+- Q: What should happen if the user drags the scrubber past the very start or end of the episode's timeline? → A: Clamp to the episode's start (0:00) or end position — dragging further has no additional effect.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Listen to a subscribed podcast (Priority: P1)
@@ -60,6 +67,10 @@ needing Explore, Search, or Settings to exist.
 7. **Given** the podcast/episode has no artwork available, **When** the
    player or Home list renders it, **Then** a clear placeholder graphic is
    shown instead of a broken or empty image.
+8. **Given** an episode is loaded in the player, **When** the user presses
+   and drags on the timeline, **Then** the displayed time updates live to
+   follow the drag, and **When** the user releases, **Then** playback
+   seeks to the released position and the progress indicator reflects it.
 
 ---
 
@@ -139,6 +150,10 @@ preferences, independent of Home, Explore, or the Player.
 - What happens when the user taps "skip backward 30 seconds" within the
   first 30 seconds of an episode? Playback MUST move back to at most the
   start of the episode (position zero) without erroring.
+- What happens when the user drags the timeline scrubber past the start or
+  end of the episode? The drag position MUST clamp at the episode's start
+  (0:00) or end; dragging further MUST have no additional effect and MUST
+  NOT trigger next/previous episode or error.
 - What happens when the user taps "next" on the last episode, or
   "previous" on the first episode, in a podcast's episode list? The
   control MUST NOT error or crash; it should be disabled or a no-op at
@@ -172,6 +187,8 @@ preferences, independent of Home, Explore, or the Player.
   forward 30 seconds, and skip backward 30 seconds.
 - **FR-005**: The Player MUST reflect playback state visually at all
   times (e.g., play vs. pause affordance, current progress/elapsed time).
+  The progress/timeline indicator MUST update at least every 250ms during
+  playback (not merely once per second) so movement appears smooth.
 - **FR-006**: The Player MUST display the current episode's artwork (or
   placeholder), episode title, and podcast name.
 - **FR-007**: Selecting "next" or "previous" MUST load the adjacent
@@ -215,6 +232,15 @@ preferences, independent of Home, Explore, or the Player.
   optional premium capability to store this data in the cloud can be
   added later without requiring a redesign of existing local data or
   user-facing behavior.
+- **FR-021**: The full-screen Player's timeline MUST support tap-and-drag
+  scrubbing: the user MUST be able to press and drag the position on the
+  timeline to a new point. While dragging, the displayed time/position
+  indicator MUST update live to follow the drag; the actual playback seek
+  MUST commit only when the user releases the drag. Dragging past the
+  episode's start or end MUST clamp at 0:00 or the episode's end
+  respectively, with no additional effect. The persistent mini-player
+  MUST continue to display playback progress but is NOT required to
+  support drag-to-scrub.
 
 ### Key Entities
 
@@ -254,6 +280,8 @@ preferences, independent of Home, Explore, or the Player.
 - **SC-008**: Turning network connectivity off and back on while using the
   app causes no data loss, crash, or unrecoverable state for any locally
   available podcast, episode, subscription, or setting.
+- **SC-009**: During playback, the timeline/progress indicator visibly
+  advances at least every 250ms rather than jumping once per second.
 
 ## Assumptions
 

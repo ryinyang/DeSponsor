@@ -26,6 +26,9 @@ interface PlaybackController {
 
     fun previous()
 
+    /** Seeks to an arbitrary position, clamped to `[0, durationSeconds]` (FR-021). */
+    fun seekTo(positionSeconds: Int)
+
     suspend fun loadEpisode(
         episode: Episode,
         podcastTitle: String,
@@ -43,14 +46,22 @@ class PlaybackControllerImpl(
     private var queue: List<Episode> = emptyList()
 
     init {
-        // Keeps positionSeconds visually live while playing (FR-005), without
-        // the caller having to poll — a plain progress-tick loop is simpler
+        // Keeps position visually live while playing (FR-005), without the
+        // caller having to poll — a plain progress-tick loop is simpler
         // than plumbing ExoPlayer listener callbacks through AudioEngine.
+        // Ticks every 250ms and reads positionMillis (not just the
+        // whole-second positionSeconds) so the timeline actually appears
+        // smooth (SC-009) rather than only updating once a whole second of
+        // truncation has passed.
         scope.launch {
             while (true) {
-                delay(1_000)
+                delay(250)
                 if (state.value.isPlaying) {
-                    state.value = state.value.copy(positionSeconds = engine.currentPositionSeconds())
+                    state.value =
+                        state.value.copy(
+                            positionSeconds = engine.currentPositionSeconds(),
+                            positionMillis = engine.currentPositionMillis(),
+                        )
                 }
             }
         }
@@ -72,6 +83,7 @@ class PlaybackControllerImpl(
                 podcastTitle = podcastTitle,
                 isPlaying = false,
                 positionSeconds = 0,
+                positionMillis = 0,
             )
     }
 
@@ -82,12 +94,24 @@ class PlaybackControllerImpl(
 
     override fun pause() {
         engine.pause()
-        state.value = state.value.copy(isPlaying = false, positionSeconds = engine.currentPositionSeconds())
+        state.value =
+            state.value.copy(
+                isPlaying = false,
+                positionSeconds = engine.currentPositionSeconds(),
+                positionMillis = engine.currentPositionMillis(),
+            )
     }
 
     override fun skipForward30() = seekBy(SKIP_SECONDS)
 
     override fun skipBackward30() = seekBy(-SKIP_SECONDS)
+
+    override fun seekTo(positionSeconds: Int) {
+        val episode = state.value.currentEpisode ?: return
+        val newPosition = clampPosition(positionSeconds, episode.durationSeconds)
+        engine.seekTo(newPosition)
+        state.value = state.value.copy(positionSeconds = newPosition, positionMillis = newPosition * 1_000L)
+    }
 
     override fun next() = jumpTo(offset = 1)
 
@@ -97,7 +121,7 @@ class PlaybackControllerImpl(
         val episode = state.value.currentEpisode ?: return
         val newPosition = clampPosition(state.value.positionSeconds + deltaSeconds, episode.durationSeconds)
         engine.seekTo(newPosition)
-        state.value = state.value.copy(positionSeconds = newPosition)
+        state.value = state.value.copy(positionSeconds = newPosition, positionMillis = newPosition * 1_000L)
     }
 
     private fun jumpTo(offset: Int) {

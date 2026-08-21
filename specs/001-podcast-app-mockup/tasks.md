@@ -378,3 +378,52 @@ With more than one developer:
 - You may stop at any checkpoint to test a story on its own.
 - Avoid: vague tasks, two tasks touching the same file marked `[P]`, and
   cross-story dependencies that break a story's independence.
+
+---
+
+## Phase 7: Convergence
+
+**Purpose**: Close gaps found between spec.md/plan.md/tasks.md and the current
+codebase (2026-08-21 `/speckit-clarify` session added FR-005's 250ms update
+requirement and FR-021's drag-to-scrub requirement; neither is implemented yet).
+
+- [X] T050 [P] Write a JVM unit test asserting `PlaybackControllerImpl`'s
+      observed `positionSeconds` advances at least every 250ms during
+      playback (not just once per second) in
+      `core/player/src/test/kotlin/com/desponsor/core/player/PlaybackControllerTest.kt`.
+      This test MUST fail until T051 is done. per FR-005 (partial)
+- [X] T051 Reduce the position-tick interval in `PlaybackControllerImpl`
+      from `delay(1_000)` to `delay(250)` (or less) in
+      `core/player/src/main/kotlin/com/desponsor/core/player/PlaybackController.kt`
+      so the T050 test passes. per FR-005 (partial)
+- [X] T052 [P] Write a JVM unit test for a new public `seekTo(positionSeconds)`
+      method on `PlaybackController` — commits an arbitrary position clamped
+      to `[0, durationSeconds]` — in
+      `core/player/src/test/kotlin/com/desponsor/core/player/PlaybackControllerTest.kt`.
+      This test MUST fail until T053 is done. per FR-021 (missing)
+- [X] T053 Add the `seekTo(positionSeconds: Int)` method to the
+      `PlaybackController` interface and `PlaybackControllerImpl` in
+      `core/player/src/main/kotlin/com/desponsor/core/player/PlaybackController.kt`,
+      reusing `clampPosition` so the T052 test passes. per FR-021 (missing)
+- [X] T054 [P] Write a Compose UI test for the Player screen — dragging the
+      timeline updates the displayed time live and releasing commits a seek
+      to the released position, clamped at the episode's start/end — in
+      `feature/player/src/androidTest/kotlin/com/desponsor/feature/player/PlayerScreenTest.kt`.
+      This test MUST fail until T055 is done. per FR-021 / US1 AC8 (missing)
+- [X] T055 [US1] Implement tap-and-drag scrubbing on the full-screen Player
+      timeline: replace the static `LinearProgressIndicator` in
+      `feature/player/src/main/kotlin/com/desponsor/feature/player/PlayerScreen.kt`
+      with a draggable slider that tracks a local live-drag position and
+      calls a new `PlayerViewModel.onScrubStart/onScrubDrag/onScrubEnd`
+      (added to
+      `feature/player/src/main/kotlin/com/desponsor/feature/player/PlayerViewModel.kt`,
+      delegating the commit to `PlaybackController.seekTo`) so the T054 test
+      passes. Scope is the full-screen Player only — the mini-player
+      (`app/src/main/kotlin/com/desponsor/app/navigation/MiniPlayerHost.kt`)
+      keeps showing progress but is not required to be draggable. per
+      FR-021 / US1 AC8 (missing)
+- [X] T056 [P] Add manual verification steps to
+      `specs/001-podcast-app-mockup/quickstart.md` for SC-009 (timeline
+      visibly advances at least every 250ms) and the drag-to-scrub
+      acceptance scenario (US1 AC8), matching the existing SC-001–SC-008
+      checks already recorded there. per plan.md Polish-phase convention (missing)
